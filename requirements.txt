@@ -1,0 +1,8 @@
+gnani-vachana
+python-dotenv
+pandas
+rank-bm25
+sentence-transformers
+faiss-cpu
+gradio
+pytest
