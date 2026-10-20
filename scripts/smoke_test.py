@@ -1,4 +1,4 @@
-import sys
+import os, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -30,19 +30,30 @@ tf = config.DATASET_DIR / "tools" / "tickets_created.csv"
 if tf.exists():
     tf.unlink()  # don't leave test tickets around
 
-# 3. Gnani TTS -> STT round trip (uses the SDK calls from the brief)
-import os
+# 3. Gnani TTS -> STT round trip
 if not os.getenv("GNANI_API_KEY"):
     check("GNANI_API_KEY set", False)
 else:
-    from gnani.stt import GnaniSTTClient
-    from gnani.tts import GnaniTTSClient
-    tts, stt = GnaniTTSClient(), GnaniSTTClient()
-    out = config.ROOT / "scripts" / "smoke.wav"
-    tts.synthesize("My order has not arrived yet.", voice="Kaveri",
-                   model="timbre-v2.5", language="en-IN", output_file=str(out))
-    heard = stt.transcribe(str(out), language_code="en-IN")["transcript"]
-    check("Gnani TTS->STT", "order" in heard.lower(), f"heard: {heard!r}")
+    try:
+        from gnani.stt import GnaniSTTClient
+        from gnani.tts import GnaniTTSClient
+        tts, stt = GnaniTTSClient(), GnaniSTTClient()
+        out = config.ROOT / "scripts" / "smoke.wav"
+        tts.synthesize("My order has not arrived yet.", voice="Kaveri",
+                       model="timbre-v2.5", language="en-IN", output_file=str(out))
+        heard = stt.transcribe(str(out), language_code="en-IN")["transcript"]
+        check("Gnani TTS->STT", "order" in heard.lower(), f"heard: {heard!r}")
+    except Exception as e:
+        check("Gnani TTS->STT", False, f"{type(e).__name__}: {e}")
 
-# 4. LLM: fill in once you've picked one
-print("[TODO] LLM call: add after choosing a provider")
+# 4. LLM (Gemini via src/agent/llm.py)
+if not os.getenv("GEMINI_API_KEY"):
+    check("GEMINI_API_KEY set", False)
+else:
+    try:
+        from src.agent.llm import chat
+        reply = chat("You are ZentroMart's AI support assistant. Reply in one sentence.",
+                     [{"role": "user", "text": "Hi, my order is late."}], use_cache=False)
+        check("LLM call", len(reply) > 0, f"-> {reply[:80]!r}")
+    except Exception as e:
+        check("LLM call", False, f"{type(e).__name__}: {e}")
