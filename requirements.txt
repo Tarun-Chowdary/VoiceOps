@@ -2,3 +2,4 @@ gnani-vachana
 python-dotenv
 pandas
 openai
+sentence-transformers
