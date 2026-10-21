@@ -5,3 +5,4 @@ dataset/
 out/
 .cache/
 tickets_created.csv
+.vscode/

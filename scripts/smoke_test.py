@@ -47,8 +47,8 @@ else:
         check("Gnani TTS->STT", False, f"{type(e).__name__}: {e}")
 
 # 4. LLM (Gemini via src/agent/llm.py)
-if not os.getenv("GEMINI_API_KEY"):
-    check("GEMINI_API_KEY set", False)
+if not os.getenv("LLM_API_KEY"):
+    check("LLM_API_KEY set", False)
 else:
     try:
         from src.agent.llm import chat
