@@ -12,5 +12,8 @@ __pycache__/
 out/
 scripts/smoke_audio/
 evals/results/*_partial.csv
+evals/results/sample_audio/
+evals/results/sample_outputs/
+evals/results/voice_auto_transcribe/
 tickets_created.csv
 *.zip
