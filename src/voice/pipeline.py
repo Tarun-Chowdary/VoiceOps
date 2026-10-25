@@ -65,17 +65,13 @@ class VoiceAgent:
         except Exception as e:
             return None, f"TTS failed: {type(e).__name__}: {e}"
 
-    def turn(self, audio_path, out_audio, kind: str = "single") -> dict:
-        rec = {"audio_in": str(audio_path), "transcript": "", "stt_language": "", "reply": "", "decision": "",
-               "intent": "", "language": self.last_lang, "used_sections": [], "retrieved_sections": [],
-               "used_chunks": [], "tool_calls": [], "ticket_id": None, "audio_out": None, "error": ""}
-        t0 = time.time()
-        try:
-            code, text = self.listen(audio_path)
-            rec.update(transcript=text, stt_language=code, stt_seconds=round(time.time() - t0, 2))
-        except Exception as e:
-            code, text = "", ""
-            rec["error"] = f"STT failed: {type(e).__name__}: {e}"
+    def _blank(self, audio_in: str = "") -> dict:
+        return {"audio_in": audio_in, "transcript": "", "stt_language": "", "reply": "", "decision": "", "intent": "",
+                "language": self.last_lang, "used_sections": [], "retrieved_sections": [], "used_chunks": [], "tool_calls": [],
+                "ticket_id": None, "verified": False, "facts": [], "audio_out": None, "error": ""}
+
+    def _answer(self, rec: dict, text: str, kind: str, out_audio) -> dict:
+        """Everything after the words are known: unclear-text recovery -> agent -> spoken reply."""
         t1 = time.time()
         if is_unclear(text):
             lang = self.last_lang
@@ -89,7 +85,7 @@ class VoiceAgent:
                 rec.update(reply=out["reply"], decision=out.get("decision", ""), intent=out.get("intent", ""), language=lang,
                            used_sections=out.get("used_sections", []), retrieved_sections=out.get("retrieved", []),
                            used_chunks=chunks_for(out.get("used_sections", [])), tool_calls=out.get("tool_calls", []),
-                           ticket_id=out.get("ticket_id"))
+                           ticket_id=out.get("ticket_id"), verified=bool(out.get("verified", False)), facts=out.get("facts", []))
             except Exception as e:
                 lang = self.last_lang
                 rec.update(reply=tpl(lang, "error"), decision="clarify", intent="error", language=lang,
@@ -101,3 +97,20 @@ class VoiceAgent:
             rec["error"] = (rec["error"] + " | " if rec["error"] else "") + err
         rec["tts_seconds"] = round(time.time() - t2, 2)
         return rec
+
+    def turn(self, audio_path, out_audio, kind: str = "single") -> dict:
+        rec = self._blank(str(audio_path))
+        t0 = time.time()
+        try:
+            code, text = self.listen(audio_path)
+            rec.update(transcript=text, stt_language=code, stt_seconds=round(time.time() - t0, 2))
+        except Exception as e:
+            text = ""
+            rec["error"] = f"STT failed: {type(e).__name__}: {e}"
+        return self._answer(rec, text, kind, out_audio)
+
+    def turn_text(self, text: str, out_audio, kind: str = "single") -> dict:
+        """Same pipeline for a typed message (skips speech recognition): used by the demo app as a fallback."""
+        rec = self._blank()
+        rec.update(transcript=text, stt_language="typed", stt_seconds=0.0)
+        return self._answer(rec, text, kind, out_audio)

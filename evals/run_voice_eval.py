@@ -74,7 +74,7 @@ for i, (_, r) in enumerate(q.iterrows(), 1):
     sku = re.search(r"sku=([A-Z]{3}-\d{4})", r["entities"])
     rows.append({"id": r["id"], "language": r["language"], "intent": r["intent"], "question": r["question"],
                  "heard": rec["transcript"], "stt_language": rec["stt_language"], "wer": wer(r["question"], rec["transcript"]) if script(r["question"]) == script(rec["transcript"]) else float("nan"),
-                 "sku_ok": ((CAT.resolve(normalize_asr(rec["transcript"])) or type("n", (), {"sku": ""})).sku == sku.group(1)) if sku else None,
+                 "sku_ok": (lambda m: bool(m) and (m.sku == sku.group(1) or sku.group(1) in m.candidates))(CAT.resolve(normalize_asr(rec["transcript"]))) if sku else None,
                  "reply": rec["reply"], "decision": rec["decision"], "expected": r["expected_decision"],
                  "retrieval_hit": retrieval_hit(r, rec["used_sections"]), "audio_out": bool(rec["audio_out"]) or a.no_reply_audio,
                  "error": rec["error"], **s})

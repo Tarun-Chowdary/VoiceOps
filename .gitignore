@@ -1,8 +1,16 @@
+# secrets and local config
 .env
 .venv/
-__pycache__/
-dataset/
-out/
-.cache/
-tickets_created.csv
 .vscode/
+# the organizer dataset must not be copied into the repo
+dataset/
+Capstone_Project_Dataset_FTTT_2026/
+# caches and generated files
+__pycache__/
+*.pyc
+.cache/
+out/
+scripts/smoke_audio/
+evals/results/*_partial.csv
+tickets_created.csv
+*.zip
