@@ -1,5 +1,6 @@
 gnani-vachana
 python-dotenv
 pandas
+numpy
 openai
 sentence-transformers

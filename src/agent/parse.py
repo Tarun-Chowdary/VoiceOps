@@ -12,8 +12,10 @@ def parse_json_reply(text: str) -> dict:
         try:
             d = json.loads(candidate)
             dec = str(d.get("decision", "answer")).lower().strip()
+            used = d.get("used_sections") or []
             return {"decision": dec if dec in VALID else "answer",
-                    "reply": str(d.get("reply", "")).strip()}
+                    "reply": str(d.get("reply", "")).strip(),
+                    "used_sections": [str(u).strip() for u in used if isinstance(u, str)]}
         except Exception:
             continue
-    return {"decision": "answer", "reply": t}   # fall back to raw text
+    return {"decision": "answer", "reply": t, "used_sections": []}   # fall back to raw text

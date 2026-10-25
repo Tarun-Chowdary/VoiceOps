@@ -16,10 +16,10 @@ class Item:
     reason: str
 
 
-def retrieve(retriever, catalog, text: str, und=None, max_total: int = 8, n_hybrid: int = 8):
+def retrieve(retriever, catalog, text: str, und=None, max_total: int = 8, n_hybrid: int = 8, prod=None):
     """text: raw customer text (ASR or typed). und: an Understanding (or None for plain hybrid)."""
     norm = normalize_asr(text)
-    prod = catalog.resolve(norm)
+    prod = prod or catalog.resolve(norm)
     cat = prod.return_category if prod and prod.return_category else None
     bm_q = norm + (" " + cat if cat else "")
     dn_q = ((und.english_query + " ") if und else "") + (cat or "") if und else bm_q
@@ -28,7 +28,7 @@ def retrieve(retriever, catalog, text: str, und=None, max_total: int = 8, n_hybr
     hits = retriever.search(bm_q, k=n_hybrid, dense_query=dn_q.strip() or bm_q)
 
     by_id = {c.section_id: c for c in retriever.chunks}
-    pins = pinned_sections(und.intent, und.payment_method, cat) if und else []
+    pins = pinned_sections(und.intent, und.payment_method, cat, getattr(und, "order_has_refund", False), getattr(und, "order_has_return", False)) if und else []
     out, seen = [], set()
     for sid in pins:
         if sid in by_id and sid not in seen:
