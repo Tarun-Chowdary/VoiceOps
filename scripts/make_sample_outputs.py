@@ -40,6 +40,10 @@ if __name__ == "__main__":
         if not wav.exists():
             customer.synthesize(text, lang, wav)
             print("spoke:", stem, "-", text)
-    if OUT.exists():
-        shutil.rmtree(OUT)
+    OUT.mkdir(exist_ok=True)
+    for old in OUT.glob("*"):                      # clear previous results file by file (OneDrive can lock a whole folder)
+        try:
+            old.unlink()
+        except OSError:
+            pass
     sys.exit(batch.main(["--audio_dir", str(AUDIO), "--out_dir", str(OUT), "--sleep", "8"]))

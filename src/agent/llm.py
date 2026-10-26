@@ -5,11 +5,15 @@ Configured entirely through env vars so switching provider = editing .env.
 import os, json, time, hashlib
 from openai import OpenAI, APIConnectionError, APITimeoutError
 from src import config
+from src.agent.ratelimit import RateLimiter
 
 BASE_URL = os.getenv("LLM_BASE_URL", "https://api.groq.com/openai/v1")
 MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
 _CACHE = config.ROOT / ".cache" / "llm"
 _CACHE.mkdir(parents=True, exist_ok=True)
+
+LLM_MAX_RPM = int(os.getenv("LLM_MAX_RPM", "30"))      # requests per minute we allow ourselves (0 = off); Gemini free tier: 12-15
+_limiter = RateLimiter(LLM_MAX_RPM, 60.0)
 
 LAST_CACHED = False      # True if the most recent chat() call was served from disk cache
 _client = None
@@ -47,6 +51,9 @@ def chat(system: str, messages: list[dict], temperature: float = 0.2,
          "content": m["text"]} for m in messages]
 
     for attempt in range(retries):
+        waited = _limiter.acquire()                  # pace ourselves BEFORE the request (cache hits above never reach this)
+        if waited >= 2:
+            print(f"   (rate limiter: waited {waited:.0f}s to stay under LLM_MAX_RPM={LLM_MAX_RPM})", flush=True)
         try:
             r = _get().chat.completions.create(model=MODEL, messages=msgs,
                                                temperature=temperature)
