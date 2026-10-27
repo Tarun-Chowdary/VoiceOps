@@ -27,20 +27,24 @@ Built for the VoiceOps 2026 capstone (IIT Guwahati Consulting & Analytics Club �
 ## 🛠 Tech Stack
 
 ### Voice
+
 - Gnani STT & TTS REST (`gnani-vachana` SDK): `en-IN` / `hi-IN` transcription, `timbre-v2.5` voices
 
 ### AI & Retrieval
+
 - Any OpenAI-compatible LLM (default: Gemini 3.5 Flash-Lite)
 - `intfloat/multilingual-e5-small` embeddings (local)
 - BM25 written from scratch, fused with Reciprocal Rank Fusion
 - A small deterministic policy calculator (business days, return windows, fees)
 
 ### Application
+
 - Python 3.10+, pandas
 - Gradio (demo app)
 - pytest (offline tests with fake LLM / STT / TTS)
 
 ### Data
+
 - Synthetic ZentroMart dataset: 9 CSV tables and 21 Markdown policy documents (not included in this repo)
 
 ---
@@ -66,14 +70,14 @@ Built for the VoiceOps 2026 capstone (IIT Guwahati Consulting & Analytics Club �
 
 ## 📊 Results
 
-| Measure (practice data) | Result |
-|---|---|
-| Step 1: prompt-only LLM | 12/52 = **23.1%** |
-| Step 2: RAG + calculator | **52/52** on the latest run (49/52 on the first) |
-| Retrieval: all gold sections found | 23.4% → 36.2% → 44.7% → 63.8% → **95.7%** (normaliser → catalog → embeddings → intent routing) |
-| LLM intent accuracy | 50/52 = 96.2% |
-| Step 3: 23 conversations / 96 turns | **95/96 turns = 99.0%**, 22/23 conversations fully correct, tool calls 100% |
-| Step 4: voice end-to-end (Gnani TTS → STT → agent → TTS) | **51/52 = 98.1%**, 52/52 spoken replies, 0 errors, English WER 6.9% |
+| Measure (practice data)                                  | Result                                                                                         |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Step 1: prompt-only LLM                                  | 12/52 = **23.1%**                                                                              |
+| Step 2: RAG + calculator                                 | **52/52** on the latest run (49/52 on the first)                                               |
+| Retrieval: all gold sections found                       | 23.4% → 36.2% → 44.7% → 63.8% → **95.7%** (normaliser → catalog → embeddings → intent routing) |
+| LLM intent accuracy                                      | 50/52 = 96.2%                                                                                  |
+| Step 3: 23 conversations / 96 turns                      | **95/96 turns = 99.0%**, 22/23 conversations fully correct, tool calls 100%                    |
+| Step 4: voice end-to-end (Gnani TTS → STT → agent → TTS) | **51/52 = 98.1%**, 52/52 spoken replies, 0 errors, English WER 6.9%                            |
 
 > Practice-set numbers are optimistic (see Limitations). Raw per-question results are in `evals/results/`.
 
@@ -219,7 +223,7 @@ scripts/            setup checks, sample outputs  docs/             report slide
 
 ## 📫 Contact / Support
 
-- For questions or suggestions, please open an issue on the [GitHub repository](https://github.com/your-username/voiceops/issues).
-- You can also reach out via email: your-email@example.com
+- For questions or suggestions, please open an issue on the [GitHub repository](<[https://github.com/your-username/voiceops/issues](https://github.com/Tarun-Chowdary/VoiceOps/issues)>).
+- You can also reach out via email: yegi.2992@gmail.com
 
 We welcome feedback and contributions!
